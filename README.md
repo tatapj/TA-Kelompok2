@@ -9,3 +9,6 @@ Pengerjaan Tugas Akhir
 
 ### Blok Sistem server Jupyter Notebook
 ![Slide3](https://user-images.githubusercontent.com/90242925/163053635-95576bbf-95ed-46cc-affd-9c1cfeabfb55.PNG)
+
+### Flowchart Website
+![Slide4](https://user-images.githubusercontent.com/65180313/163311822-2ed531b1-5798-4e49-ba5a-c8195bf06bee.jpg)

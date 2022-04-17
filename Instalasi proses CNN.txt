@@ -1,0 +1,160 @@
+#Langkah untuk Klasifikasi menggunakan CNN
+###Anaconda
+Anaconda merupakan salah satu platform yang banyak digunakan untuk bahasa pemrograman Python untuk kebutuhan data science dan machine learning. Jupyter Notebook diakses melalui browser. Anaconda memiliki berbagai tools yang membantu pekerjaan sehingga kita tidak perlu instalasi library yang dibutuhkan dalam pengerjaannya. Salah satu tools yang dapat digunakan pada Anaconda adalah Jupyter Notebook. 
+
+###Langkah Instalasi Anaconda:
+- Download Anaconda pada pranala berikut:
+https://www.anaconda.com/products/distribution 
+Kemudian melakukan instalasi jika file tersebut sudah selesai di download.
+-	Akses Anaconda Navigator hingga muncul tampilan berikut
+![1](https://user-images.githubusercontent.com/90242925/163731839-dfbb611c-6c9b-4ef5-8811-953f8459f7d5.png)
+
+###Langkah Klasifikasi CNN
+Membuat Environments baru, dalam hal ini kami membutuhkan Tensorflow dan Keras. Tensorflow adalah sebuah framework machine learning yang saat ini banyak digunakan oleh banyak orang untuk melakukan proses komputasi numerical. Sedangkan salah satu library yang dapat berjalan diatas Tensorflow adalah Keras. Keras merupakan high-level neural network API yang ditulis dari bahasa Python
+Impor semua package/library yang dibutuhkan dengan perinntah berikut:
+-	import os
+-	import numpy as np
+-	import tensorflow as tf
+-	Perintah yang digunakan untuk mengevaluasi performa model machine learning. Metode evaluasi model ini membagi dataset menjadi dua bagian yakni bagian yang digunakan untuk training data dan untuk testing data dengan proporsi tertentu.
+-	from sklearn import datasets
+-	from sklearn.model_selection import train_test_split
+
+Proses Pre=processing dengan Untuk melakukan instalasi Keras, backend yang di inginkan harus di install terlebih dahulu. Sama dengan proses konfigurasi, dengan menggunakan pip. Kita import Sequential untuk model neural network kita yang berupa sequential network. Untuk diketahui, dasar dari inisialisasi neural network selain sequential adalah graph. Import Dalam proses yang pertama ini, kita ingin membagi datanya menjadi 3 bagian. yaitu train, test, dan validation. dengan proporsi (80,10,10). Scikit-learn digunakan untuk pemrosesan awal data, pelatihan, pengoptimalan, dan evaluasi model. 
+Setelah menyiapkan dataset yang diperlukan, maka tahap selanjutnya adalah Pre-processing. Kami menggunakan tensorflow untu memproses pre-processingnya dan import optimizers Adam juga mengimport ImageDataGenerator. Pre-processing dilakukan untuk melatih sistem yang dibangun untuk mengenali berbagai jenis kondisi dari data. Dalam program menggunakan rescale 1./255 untuk bisa mengenali data sekecil mungkin. 
+- import tensorflow as tf
+- from tensorflow.keras.optimizers import Adam
+- from tensorflow.keras.preprocessing.image import ImageDataGenerator
+- train_datagen = ImageDataGenerator(
+                  rescale = 1./255
+)
+
+#Membuat direktori baru
+test_dir = os.path.join(base_dir, 'test')
+train_dir = os.path.join(base_dir, 'train')
+val_dir = os.path.join(base_dir, 'val')
+
+Kemudian untuk target dari ukuran data dapat dilihat dari program di bawah ini, sehingga membentuk 3 kelas.
+train_generator = train_datagen.flow_from_directory(
+    train_dir,
+    target_size = (150, 150),
+    batch_size = 32,
+    class_mode = 'categorical'
+)
+
+val_generator = train_datagen.flow_from_directory(
+    val_dir,
+    target_size = (150, 150),
+    batch_size = 32, 
+    class_mode = 'categorical'
+)
+
+Kemudian membentuk Callback. Callback hanya sebuah istilah untuk function yang di passing ke dalam function lain sebagai argument, yang kemudian di eksekusi oleh function yang membungkus function callback tersebut.  
+class myCallback(tf.keras.callbacks.Callback):
+  def on_epoch_end(self, epoch, logs = {}):
+    if(logs.get('val_accuracy') > 0.95):
+      print('\nAkurasi mencapai 95%')
+      self.model.stop_training = True
+
+callbacks = myCallback()
+
+Dalam proses membentuk model CNN menggunakan bantuan keras.
+model = tf.keras.models.Sequential([
+          tf.keras.layers.Conv2D(32, (3, 3), activation = 'relu', input_shape = (150, 150, 3)),
+          tf.keras.layers.MaxPooling2D(2, 2),
+          tf.keras.layers.Conv2D(64, (3, 3), activation = 'relu'),
+          tf.keras.layers.MaxPooling2D(2, 2),
+          tf.keras.layers.Conv2D(128, (3, 3), activation = 'relu'),
+          tf.keras.layers.MaxPooling2D(2, 2),
+          tf.keras.layers.Flatten(),
+          tf.keras.layers.Dense(250, activation = 'relu'),
+          tf.keras.layers.Dropout(0.3),
+          tf.keras.layers.Dense(3, activation = 'softmax')
+])
+
+Kemudian compile model menggunakan optimizer ‘Adam’ untuk mengupdate bobot atau interaksinya supaya lebih cepat mencapai titik optimalnya. Langkah selanjutnya membuat model fix atau melakukan Processing data. 
+model.compile(loss = 'categorical_crossentropy',
+              optimizer = tf.keras.optimizers.Adam(learning_rate=0.00001),
+              metrics = ['accuracy'])
+
+history = model.fit(
+            train_generator,
+            epochs = 40,
+            validation_data = val_generator,
+            callbacks = [callbacks]
+)
+
+Proses selanjutnya adalah tingkat akurasi dan loss model.
+%matplotlib inline
+
+import matplotlib.image as mping
+import matplotlib.pyplot as plt
+
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs = range(len(acc))
+
+plt.plot(epochs, acc, 'r', label = 'Training Accuracy')
+plt.plot(epochs, val_acc, 'b', label = 'Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.legend(loc = 'best')
+plt.show()
+
+plt.plot(epochs, loss, 'r', label = 'Training Loss')
+plt.plot(epochs, val_loss, 'b', label = 'Validation Loss')
+plt.title('Training and Validation Accuracy')
+plt.legend(loc = 'best')
+plt.show()
+
+Proses selanjutnya adalah mencoba melakukan klasifikasi dari model. Menggunakan library yang dibutuhkan seperti pada program di bawah ini.
+import numpy as np
+from keras.preprocessing import image
+from google.colab import files
+import matplotlib.pyplot as plt
+from tensorflow.keras.layers import Dense
+import tensorflow as tf
+from tensorflow.keras import Model
+from keras.models import Model
+
+uploaded = files.upload()
+
+for fn in uploaded.keys():
+
+  #predicting images
+  path = fn
+  img = image.load_img(path, target_size = (150, 150))
+  implot = plt.imshow(img)
+  x = image.img_to_array(img)
+  x = np.expand_dims(x, axis = 0)
+
+  images = np.vstack([x])
+  classes = model.predict(images, batch_size = 100)
+  print(classes)
+
+Output sudah menghasilkan klasifikasi yang benar, memperlihatkan bahwa gambar yang di input adalah kelas pertama yaitu kondisi cuaca cerah. 
+Kemudian menyimpan file model yang sudah kita buat, agar dapat kita gunakan kembali untuk data baru yang akan di input.
+model.save("file.h5")
+
+Perintah yang digunakan untuk menyediakan paket h5py. Paket h5py menyediakan antarmuka tingkat tinggi dan rendah ke perpustakaan HDF5 dari Python. Antarmuka tingkat rendah dimaksudkan untuk menjadi pembungkus lengkap API HDF5, sedangkan komponen tingkat tinggi mendukung akses ke file HDF5, kumpulan data, dan grup menggunakan konsep Python dan NumPy yang sudah mapan.
+pip install pyyaml h5py
+
+Perintah yang digunakan untuk menguji model klasifikasi
+model = keras.models.load_model('C:/Users/User/Desktop/TA-Kelompok2/model_TA.h5')
+
+def classify(path):
+
+  #predicting images
+  #path = fn
+  img = image.load_img(path, target_size = (150, 150))
+  implot = plt.imshow(img)
+  x = image.img_to_array(img)
+  x = np.expand_dims(x, axis = 0)
+
+  images = np.vstack([x])
+  classes = model.predict(images, batch_size = 100)
+  print(classes)
+
+classify("D:/KULIAH/sem 6/1333201_Tugas Akhir II/week2/Dataset/Cerah/1.jpg")
+

@@ -6,8 +6,6 @@ Anaconda merupakan salah satu platform yang banyak digunakan untuk bahasa pemrog
 - Download Anaconda pada pranala berikut:
 https://www.anaconda.com/products/distribution 
 Kemudian melakukan instalasi jika file tersebut sudah selesai di download.
--	Akses Anaconda Navigator hingga muncul tampilan berikut
-![1](https://user-images.githubusercontent.com/90242925/163731839-dfbb611c-6c9b-4ef5-8811-953f8459f7d5.png)
 
 ###Langkah Klasifikasi CNN
 Membuat Environments baru, dalam hal ini kami membutuhkan Tensorflow dan Keras. Tensorflow adalah sebuah framework machine learning yang saat ini banyak digunakan oleh banyak orang untuk melakukan proses komputasi numerical. Sedangkan salah satu library yang dapat berjalan diatas Tensorflow adalah Keras. Keras merupakan high-level neural network API yang ditulis dari bahasa Python

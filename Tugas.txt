@@ -1,2 +1,0 @@
-Mengubah gambaran umum sistem
-Proses Klasifikasi menggunakan Jupyter Notebook

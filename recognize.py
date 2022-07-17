@@ -12,7 +12,7 @@ import json
 import time
 
 #setting ip server + nama folder web laravel
-SERVER = "192.168.251.18/weather/public"
+SERVER = "localhost/weather/public"
 
 URL_get_new_img = "http://"+SERVER+"/api/get-new-image"   #url untuk check gambar baru yang masuk ke web laravel
 URL_update_img = "http://"+SERVER+"/api/update-image"     #url untuk update status gambar setelah di recognize
@@ -21,7 +21,7 @@ model = keras.models.load_model('model_TA.h5')            #load model klasifikas
 
 filename_img = "gambar.jpg"                               #nama default gambar yang di download dari laravel ke python untuk proses recognize
 
-def classify(path):             #fungsi klasifikasi cuaca
+def classify(path):                                       #fungsi klasifikasi cuaca
   print("classify")
   #predicting images
   #path = fn
@@ -31,9 +31,12 @@ def classify(path):             #fungsi klasifikasi cuaca
   x = np.expand_dims(x, axis = 0)
 
   images = np.vstack([x])
-  classes = model.predict(images, batch_size = 100)
-  return classes                #output klasifikasi berupa array [1, 0, 0] artinya cuaca cerah | [0, 1, 0] cuaca hujan | [0, 0, 1] cuaca mendung
+  classes = model.predict(images, batch_size = 32)      #memprediksi label nilai data berdasarkan model yang dilatih
+  print (classes) # Mencetak persentase tiap kelas dengan menggunakan angka baku
+  return classes                                         #output klasifikasi berupa array [1, 0, 0] artinya cuaca cerah | [0, 1, 0] cuaca hujan | [0, 0, 1] cuaca mendung
 
+
+classify(filename_img) # Memanggil fungsi klasifikasi menggunakan model keras
 
 
 print("Starting system")
@@ -59,8 +62,8 @@ while True:
       hujan = int(result[0][1])                   #hujan array ke 1
       mendung = int(result[0][2])                 #mendung array ke 2
       Status_Klasifikasi = "-"
-      Status_Jedela = 0
-      if cerah == 1:
+      Status_Jedela = 0                           
+      if cerah == 1:                              #Default status jendela adalah 0, jika cerah maka nilai = 1 tapi k
         Status_Klasifikasi = "Cerah"
         Status_Jedela = 1
       if hujan == 1:

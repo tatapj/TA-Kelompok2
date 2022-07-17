@@ -9,23 +9,23 @@ from time import sleep
 from picamera import PiCamera
 
 #setting ip server + nama folder web laravel
-SERVER = "172.20.40.139/weather/public"
+SERVER = "172.20.40.44/weather/public"
+
 
 URL_save_capture = "http://"+SERVER+"/api/send-image"               #url untuk raspi mengirim gambar ke web dengan interval waktu tertentu
 URL_klasifikasi_cuaca = "http://"+SERVER+"/api/getcuaca"            #url untuk mendapatkan hasil recognize cuaca dari web
 URL_request_capture = "http://"+SERVER+"/api/cek-capture"           #url untuk cek secara berkala apakah ada perintah capture foto manual
 URL_request_capture_save = "http://"+SERVER+"/api/capture-image"    #url untuk mengirim data foto dari perintah capture foto manual
 
-#print(width, height)
 camera = picamera.PiCamera()
-camera.resolution = (1024, 768)             
-camera.brightness = 45
+camera.resolution = (1024, 768)
+camera.brightness = 41
 camera.start_preview()
 camera.stop_preview() 
 cam = cv2.VideoCapture(0)
 img_name = "capture.jpg"                    #nama default foto saat capture
 
-capture_interval = 3600                     #detik interval pengiriman foto
+capture_interval = 3600                       # detik interval pengiriman foto
 last_capture = time.time()
 capture_flag = False
 
@@ -38,7 +38,7 @@ Relay = 4                                   #GPIO 4
 
 GPIO.setup(Relay,GPIO.OUT)
 
-GPIO.output(Relay,True)                     # set relay OFF
+GPIO.output(Relay,True)                        # set relay OFF
 
 while True:
     #check interval capture foto
@@ -50,16 +50,9 @@ while True:
     if capture_flag:                        #jika waktunya capture foto
         try:
             camera.start_preview()
-            sleep(10)
+            sleep(1)
             camera.capture(img_name)
             camera.stop_preview() 
-            #ret, frame = cam.read()
-            #if not ret:                     #bila gagal membuka camera, maka ulangi 
-                #print("failed to grab frame")
-                #cam.release()
-                #cam = cv2.VideoCapture(0)
-                #ret, frame = cam.read()
-            #cv2.imshow("Capture Img", frame)
 
             k = cv2.waitKey(1)
             if k%256 == 27:
@@ -67,11 +60,11 @@ while True:
                 print("Escape hit, closing...")
                 break
             camera.start_preview()
-            sleep(5)
+            sleep(2)
             camera.capture(img_name)
-            camera.stop_preview()               #save image foto
+            camera.stop_preview()               
             print("Image captured")
-            last_capture = time.time()
+            last_capture = time.time()  #save image foto
             files = {'gambar_cuaca': open(img_name, 'rb')}
             send_img = requests.post(URL_save_capture, files=files, timeout=3)      #kirim foto method POST ke web laravel
             #print(send_img.text)
@@ -115,16 +108,15 @@ while True:
         check_request_json = check_request.json()
         if check_request_json['status'] == 'success':                   #jika response status sukses maka artinya tombol capture di tekan
             #capture img
-            camera.start_preview()
+            camera.start_preview() 
             camera.stop_preview() 
             #cv2.imshow("Capture Img", frame)
 
             k = cv2.waitKey(1)
-            if k%256 == 27:
-                # ESC pressed
+            if k%256 == 27: #wait for ESC key to exit
                 print("Escape hit, closing...")
                 break
-            sleep(10)
+            sleep(2)
             camera.capture(img_name)
             camera.stop_preview()                                #capture image foto
             print("Image manual captured")
@@ -142,4 +134,4 @@ while True:
     except Exception as e:
         print(e)
         
-    time.sleep(2)                                       #delay 2 detik sebelum program looping
+    time.sleep(2)
